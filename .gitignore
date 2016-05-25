@@ -136,3 +136,7 @@ fabric.properties
 
 ./backup_machine.py
 backup_machine.py
+
+#Ignore html files
+data/html/*.html
+.data/html/*.html

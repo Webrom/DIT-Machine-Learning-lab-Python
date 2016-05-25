@@ -1,10 +1,34 @@
 import pandas as pd
+import plotly.offline as py
+import plotly.graph_objs as go
 from sklearn import preprocessing
 from sklearn.feature_extraction import DictVectorizer
 import numpy as np
 
 # Import Data
 censusData = pd.read_csv("data/diabetic_data.csv", na_values=['?'])
+
+#Draw plot
+for col in censusData.columns:
+    #if the column is continuous and that they have a cardinality higher than 10, histogram !
+    if censusData[col].dtypes == 'int64' and censusData[col].value_counts().__len__() >= 10:
+        tab=censusData[col].value_counts().sort_index()
+        data = [
+            go.Scatter(
+                x=tab.keys(),
+                y=tab.values
+            )
+        ]
+        plot_url = py.plot(data, filename='data/html/'+col+".html")
+    #Else, it's just bar plot
+    else:
+        data = [
+            go.Bar(
+                x=censusData[col].value_counts().keys(),
+                y=censusData[col].value_counts().values
+            )
+        ]
+        plot_url = py.plot(data, filename='data/html/'+col+".html")
 
 # Select target label
 targetLabels = censusData['readmitted']
