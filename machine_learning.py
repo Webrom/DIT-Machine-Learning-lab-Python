@@ -12,8 +12,8 @@ censusData = pd.read_csv("data/diabetic_data.csv", na_values=['?'])
 censusData = censusData.drop('encounter_id', axis=1)
 censusData = censusData.drop('patient_nbr', axis=1)
 
-# Draw plot
-for col in censusData.columns:
+# Draw plot, uncomment to use it
+"""for col in censusData.columns:
     # if the column is continuous and that they have a cardinality higher than 10, histogram !
     if censusData[col].dtypes == 'int64' and censusData[col].value_counts().__len__() >= 10:
         tab = censusData[col].value_counts().sort_index()
@@ -32,7 +32,7 @@ for col in censusData.columns:
                 y=censusData[col].value_counts().values
             )
         ]
-        plot_url = py.plot(data, filename='data/html/' + col + ".html")
+        plot_url = py.plot(data, filename='data/html/' + col + ".html")"""
 
 # Select target label
 targetLabels = censusData['readmitted']
