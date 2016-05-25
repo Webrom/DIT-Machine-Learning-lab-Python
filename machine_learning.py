@@ -47,6 +47,7 @@ numeric_dfs = censusData.select_dtypes(include=['int64'])
 # Take categories values
 cat_dfs = censusData.select_dtypes(include=['object'])
 
+#Calcul of missing values
 continous_dqr = numeric_dfs.describe().transpose()
 
 categorical_dqr = cat_dfs.describe(include=['O']).transpose()
@@ -75,6 +76,14 @@ for col in censusData.columns:
 
 continous_dqr.to_csv("./data/DQR-ContinousFeatures.csv")
 categorical_dqr.to_csv("./data/DQR-CategoricalFeatures.csv")
+
+#Replace NaN values
+for col in cat_dfs.columns:
+    if categorical_dqr.loc[col, 'Miss%'] < 30:
+        cat_dfs[col] = cat_dfs[col].fillna(categorical_dqr.loc[col, 'top'])
+    elif categorical_dqr.loc[col, 'Miss%'] > 60:
+        cat_dfs = cat_dfs.drop(col, axis=1)
+
 
 
 
