@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import NearestNeighbors
 from sklearn.neighbors import KNeighborsClassifier
+import math as math
 
 
 
@@ -65,6 +66,8 @@ continous_dqr = numeric_dfs.describe().transpose()
 categorical_dqr = cat_dfs.describe(include=['O']).transpose()
 
 continous_dqr['Miss%'] = 0
+categorical_dqr['Miss%'] = 0
+categorical_dqr['Miss'] = 0
 categorical_dqr['2nd Mode'] = 0
 categorical_dqr['2nd Mode freq'] = 0
 
@@ -74,6 +77,7 @@ for col in censusData.columns:
 
     if censusData[col].dtype != np.int64:
         categorical_dqr.ix[col, 'Miss%'] = (val/len(censusData[col]))*100
+        categorical_dqr.ix[col, 'Miss'] = val
         try:
             categorical_dqr.ix[col, '2nd Mode'] = count.index[1]
             categorical_dqr.ix[col, '2nd Mode freq'] = count.irow(1)
@@ -91,10 +95,49 @@ categorical_dqr.to_csv("./data/DQR-CategoricalFeatures.csv")
 
 #Replace NaN values
 for col in cat_dfs.columns:
-    if categorical_dqr.loc[col, 'Miss%'] < 60:
+    if categorical_dqr.loc[col, 'Miss%'] < 30:
         cat_dfs[col] = cat_dfs[col].fillna(categorical_dqr.loc[col, 'top'])
-    elif categorical_dqr.loc[col, 'Miss%'] > 60:
+    elif 30 <= categorical_dqr.loc[col, 'Miss%'] < 60:
+        firstValue = categorical_dqr.loc[col, 'top']
+        secondValue = categorical_dqr.loc[col, '2nd Mode']
+        threshold = categorical_dqr.loc[col, 'Miss']*(categorical_dqr.loc[col, 'freq']/(categorical_dqr.loc[col, 'freq']+categorical_dqr.loc[col, '2nd Mode freq']))
+        i = 0.0
+        for row in range(len(cat_dfs[col])):
+            if type(cat_dfs[col][row]) is float and math.isnan(cat_dfs[col][row]) and i < threshold:
+                cat_dfs[col][row] = firstValue
+                i += 1
+            elif type(cat_dfs[col][row]) is float and math.isnan(cat_dfs[col][row]) and i >= threshold:
+                cat_dfs[col][row] = secondValue
+                i += 1
+    elif categorical_dqr.loc[col, 'Miss%'] >= 60:
         cat_dfs = cat_dfs.drop(col, axis=1)
+
+# To verify that we don't have missing value in categorical
+
+categorical_dqr2 = cat_dfs.describe(include=['O']).transpose()
+
+categorical_dqr2['Miss%'] = 0
+categorical_dqr2['Miss'] = 0
+categorical_dqr2['2nd Mode'] = 0
+categorical_dqr2['2nd Mode freq'] = 0
+
+for col in cat_dfs.columns:
+    val = cat_dfs[col].isnull().sum()
+    count = cat_dfs[col].value_counts(sort=1)
+
+    categorical_dqr2.ix[col, 'Miss%'] = (val / len(cat_dfs[col])) * 100
+    categorical_dqr2.ix[col, 'Miss'] = val
+    try:
+        categorical_dqr2.ix[col, '2nd Mode'] = count.index[1]
+        categorical_dqr2.ix[col, '2nd Mode freq'] = count.irow(1)
+    except Exception:
+        categorical_dqr2.ix[col, '2nd Mode'] = 0
+        categorical_dqr2.ix[col, '2nd Mode freq'] = 0
+
+
+        # Saving the DQRs
+
+categorical_dqr2.to_csv("./data/After_Remove_Missing_Values_DQR-CategoricalFeatures.csv")
 
 
 # transpose into array of dictionaries (one dict per instance) of feature:level pairs
