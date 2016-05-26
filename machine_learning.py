@@ -1,9 +1,17 @@
 import pandas as pd
 import plotly.offline as py
 import plotly.graph_objs as go
+from sklearn import tree
+from sklearn import cross_validation
 from sklearn import preprocessing
 from sklearn.feature_extraction import DictVectorizer
 import numpy as np
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+#Draw the confusion matrix
+import matplotlib.pyplot as plt
+
 
 # Import Data
 censusData = pd.read_csv("data/diabetic_data.csv", na_values=['?','None'])
@@ -79,12 +87,10 @@ categorical_dqr.to_csv("./data/DQR-CategoricalFeatures.csv")
 
 #Replace NaN values
 for col in cat_dfs.columns:
-    if categorical_dqr.loc[col, 'Miss%'] < 30:
+    if categorical_dqr.loc[col, 'Miss%'] < 60:
         cat_dfs[col] = cat_dfs[col].fillna(categorical_dqr.loc[col, 'top'])
     elif categorical_dqr.loc[col, 'Miss%'] > 60:
         cat_dfs = cat_dfs.drop(col, axis=1)
-
-
 
 
 # transpose into array of dictionaries (one dict per instance) of feature:level pairs
@@ -96,3 +102,49 @@ vec_cat_dfs = vectorizer.fit_transform(cat_dfs)
 
 # Merge Categorical and Numeric Descriptive Features
 train_dfs = np.hstack((numeric_dfs.as_matrix(), vec_cat_dfs))
+
+#define a decision tree model using entropy based information gain
+decTreeModel = tree.DecisionTreeClassifier(criterion='entropy')
+
+#Split the data: 60% training : 40% test set
+instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=0.4, random_state=0)
+
+#fit the model using just the test set
+decTreeModel.fit(instances_train, target_train)
+
+#Use the model to make predictions for the test set queries
+predictions = decTreeModel.predict(instances_test)
+
+
+#Output the accuracy score of the model on the test set
+print("Accuracy= " + str(accuracy_score(target_test, predictions, normalize=True)))
+
+#Output the confusion matrix on the test set
+confusionMatrix = confusion_matrix(target_test, predictions)
+print(confusionMatrix)
+print("\n\n")
+
+# Show confusion matrix in a separate window
+plt.matshow(confusionMatrix)
+#plt.plot(confusionMatrix)
+plt.title('Confusion matrix')
+plt.colorbar()
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
+plt.show()
+
+#--------------------------------------------
+# Cross-validation to Compare to Models
+#--------------------------------------------
+print("------------------------")
+print("Cross-validation Results")
+print("------------------------")
+
+#run a 10 fold cross validation on this model using the full census data
+scores=cross_validation.cross_val_score(decTreeModel, instances_train, target_train, cv=5)
+#the cross validaton function returns an accuracy score for each fold
+print("Entropy based Model:")
+print("Score by fold: " + str(scores))
+#we can output the mean accuracy score and standard deviation as follows:
+print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+print("\n\n")
