@@ -135,7 +135,7 @@ for col in cat_dfs.columns:
         categorical_dqr2.ix[col, '2nd Mode freq'] = 0
 
 
-        # Saving the DQRs
+        # Saving the DQRs after remove (only to check)
 
 categorical_dqr2.to_csv("./data/After_Remove_Missing_Values_DQR-CategoricalFeatures.csv")
 
@@ -205,7 +205,7 @@ print("\n\n")
 decTreeModel2 = tree.DecisionTreeClassifier(criterion='gini')
 
 #Split the data: 60% training : 40% test set
-instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=0.2, random_state=0)
+instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=1, random_state=0)
 
 #fit the model using just the test set
 decTreeModel2.fit(instances_train, target_train)
