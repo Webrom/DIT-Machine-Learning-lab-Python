@@ -194,7 +194,7 @@ print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 print("\n\n")
 
 
-"""
+
 ###########################Tree model using gini criterion#############################
 
 # for a comparison we will do the same experiment using a decision tree that uses the Gini impurity metric
@@ -202,7 +202,7 @@ decTreeModel2 = tree.DecisionTreeClassifier(criterion='gini')
 
 # Split the data: 60% training : 40% test set
 instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels,
-                                                                                               test_size=0.1,
+                                                                                               test_size=0.25,
                                                                                                random_state=0)
 
 # fit the model using just the test set
@@ -239,15 +239,15 @@ print("------------------------")
 scores = cross_validation.cross_val_score(decTreeModel2, instances_train, target_train, cv=5)
 print("Gini based Model:")
 print("Score by fold: " + str(scores))
-print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))"""
+print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
 #################Model forest random#############################
-"""
+
 #define a random forest model
 rfc = RandomForestClassifier(n_estimators=100)
 
 #Split the data: 60% training : 40% test set
-instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=0.4, random_state=0)
+instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=0.25, random_state=0)
 
 #fit the model using just the test set
 rfc.fit(instances_train, target_train)
@@ -286,16 +286,16 @@ print("Score by fold of the random forest: " + str(scores))
 #we can output the mean accuracy score and standard deviation as follows:
 print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 print("\n\n")
-"""
+
 
 #################Model nearest neighbour#############################
 
-"""
+
 #define a nearest neighbour model
 nbrs = KNeighborsClassifier(n_neighbors=2, algorithm='auto')
 
 #Split the data: 60% training : 40% test set
-instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=0.4, random_state=0)
+instances_train, instances_test, target_train, target_test = cross_validation.train_test_split(train_dfs, targetLabels, test_size=0.25, random_state=0)
 
 #fit the model using just the test set
 nbrs.fit(instances_train, target_train)
@@ -335,4 +335,4 @@ print("Score by fold of the nearest neighbour: " + str(scores))
 print("Accuracy: %0.4f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 print("\n\n")
 
-"""
+
